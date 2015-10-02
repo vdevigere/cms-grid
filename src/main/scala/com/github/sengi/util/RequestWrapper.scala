@@ -4,7 +4,6 @@ import javax.servlet.http.{Cookie, HttpServletRequest}
 
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.Option
 import scala.annotation.tailrec
 
 /**

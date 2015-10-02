@@ -2,7 +2,7 @@ package com.github.sengi.undertow
 
 import javax.servlet.DispatcherType
 
-import com.github.sengi.servlets.{EchoSeedServlet, SeedFilter}
+import com.github.sengi.servlets.{CampaignSelectionFilter, EchoSeedServlet, SeedFilter}
 import com.typesafe.scalalogging.LazyLogging
 import io.undertow.server.handlers.PathHandler
 import io.undertow.servlet.Servlets
@@ -20,6 +20,7 @@ object UndertowContainer extends LazyLogging with AutoCloseable {
     .setDeploymentName("sengi")
     .addServlet(Servlets.servlet("echoSeed", classOf[EchoSeedServlet]).addMapping("/*"))
     .addFilter(Servlets.filter("seedFilter", classOf[SeedFilter])).addFilterUrlMapping("seedFilter", "/*", DispatcherType.REQUEST)
+    .addFilter(Servlets.filter("campaignSelector", classOf[CampaignSelectionFilter])).addFilterUrlMapping("campaignSelector", "/*", DispatcherType.REQUEST)
 
   val manager: DeploymentManager = Servlets.defaultContainer().addDeployment(servletBuilder)
   manager.deploy()

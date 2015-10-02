@@ -1,16 +1,15 @@
 package com.github.sengi.util
 
 import javax.servlet.http.{Cookie, HttpServletRequest}
-import RequestWrapper._
-import com.github.sengi.BaseSpec
-import org.mockito.Mockito._
 
-import org.scalatest.{Matchers, FlatSpec}
+import com.github.sengi.BaseSpec
+import com.github.sengi.util.RequestWrapper._
+import org.mockito.Mockito._
 
 /**
  * Created by Viddu on 10/1/2015.
  */
-class RequestWrapperTest extends BaseSpec{
+class RequestWrapperTest extends BaseSpec {
 
 
   "looking for key[cookie_param]" should "find the value [cookie_value] in cookie" in {

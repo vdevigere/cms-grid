@@ -3,8 +3,8 @@ package com.github.sengi.servlets
 import javax.servlet._
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 
-import com.fasterxml.uuid.Generators
 import com.github.sengi.util.RequestWrapper._
+import com.github.sengi.util.UUIDGenarator
 import com.typesafe.scalalogging.LazyLogging
 
 /**
@@ -23,7 +23,7 @@ class SeedFilter extends Filter with LazyLogging {
     logger.debug("Setting seed >>")
     val httpRequest = request.asInstanceOf[HttpServletRequest]
     val httpResponse = response.asInstanceOf[HttpServletResponse]
-    val seedCookie = httpRequest.getCookie(SEED_COOKIE_NAME).getOrElse(new Cookie(SEED_COOKIE_NAME, generator.generate().toString))
+    val seedCookie = httpRequest.getCookie(SEED_COOKIE_NAME).getOrElse(new Cookie(SEED_COOKIE_NAME, UUIDGenarator.generate.toString))
     httpRequest.setAttribute(SEED_COOKIE_NAME, seedCookie.getValue)
     seedCookie.setMaxAge(THIRTY_DAYS_IN_SECONDS)
     seedCookie.setPath("/")
@@ -42,5 +42,4 @@ class SeedFilter extends Filter with LazyLogging {
 object SeedFilter {
   val THIRTY_DAYS_IN_SECONDS: Int = 30 * 24 * 3600
   val SEED_COOKIE_NAME = "SEED"
-  val generator = Generators.randomBasedGenerator()
 }
