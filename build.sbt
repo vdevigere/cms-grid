@@ -17,3 +17,7 @@ libraryDependencies += "io.undertow" % "undertow-core" % "1.3.0.CR2"
 libraryDependencies += "io.undertow" % "undertow-servlet" % "1.3.0.CR2"
 
 libraryDependencies += "com.fasterxml.uuid" % "java-uuid-generator" % "3.1.4"
+
+libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test"
+
+libraryDependencies += "org.mockito" % "mockito-core" % "1.10.19" % "test"
