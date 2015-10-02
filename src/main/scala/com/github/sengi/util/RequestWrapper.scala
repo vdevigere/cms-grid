@@ -16,10 +16,11 @@ class RequestWrapper(request: HttpServletRequest) extends LazyLogging {
   import RequestWrapper._
 
   def getCookie(name: String): Option[Cookie] = {
-    if (request.getCookies != null) request.getCookies.find(_.getName.equalsIgnoreCase(name)) else Option.empty
+    val allCookies = request.getCookies
+    if (allCookies != null) allCookies.find(_.getName.equalsIgnoreCase(name)) else None
   }
 
-  def findValueInCookie: handlerFunc = (req, name) => {
+  def findValueInCookie: HandlerFunc = (req, name) => {
     logger.debug("finding in cookies..")
     req.getCookie(name) match {
       case opt: Some[Cookie] => Option(opt.get.getValue)
@@ -27,44 +28,39 @@ class RequestWrapper(request: HttpServletRequest) extends LazyLogging {
     }
   }
 
-  def findValueInHeader: handlerFunc = (req, name) => {
+  def findValueInHeader: HandlerFunc = (req, name) => {
     logger.debug("finding in headers..")
     val headerValue = req.getHeader(name)
     if (headerValue != null) Option(headerValue) else None
   }
 
-  def findValueInAttributes: handlerFunc = (req, name) => {
+  def findValueInAttributes: HandlerFunc = (req, name) => {
     logger.debug("finding in attributes..")
     val attrVal = req.getAttribute(name)
     if (attrVal != null) Option(attrVal.asInstanceOf[String]) else None
   }
 
   def findValue(name: String): Option[String] = {
-    findValueInCookie :: findValueInHeader :: Nil handle(request, name)
+    findValueInCookie :: findValueInHeader :: findValueInAttributes :: Nil apply(request, name)
   }
 
 }
 
 object RequestWrapper {
 
-  type handlerFunc = (HttpServletRequest, String) => Option[String]
+  type HandlerFunc = (HttpServletRequest, String) => Option[String]
 
-  trait Handler {
-    def handle(req: HttpServletRequest, name: String): Option[String]
-  }
-
-
-  implicit def listOfHandlerFuncs(handlers: List[handlerFunc]): Handler = new Handler {
-    override def handle(request: HttpServletRequest, name: String): Option[String] = foo(request, name, handlers)
-
-    private def foo(req: HttpServletRequest, name: String, handlers: List[handlerFunc]): Option[String] = {
-      if (handlers.isEmpty) Option.empty[String]
-      else handlers.head(req, name) match {
-        case value: Some[String] => value
-        case None => foo(req, name, handlers.tail)
-      }
+  @tailrec
+  def handleList(request: HttpServletRequest, name: String, handlers: List[HandlerFunc]): Option[String] = {
+    if (handlers.isEmpty) None
+    else handlers.head(request, name) match {
+      case value: Some[String] => value
+      case None => handleList(request, name, handlers.tail)
     }
   }
+
+  implicit def listToHandlerFunction(handlers: List[HandlerFunc]): HandlerFunc = (request, name) => handleList(request, name, handlers)
+
 
   implicit def wrap(request: HttpServletRequest): RequestWrapper = new RequestWrapper(request)
 
