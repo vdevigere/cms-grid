@@ -9,7 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
  */
 class CampaignSelectionFilter extends Filter with LazyLogging {
   override def init(filterConfig: FilterConfig): Unit = {
-
+    logger.debug("Initializing CampaignSelectionFilter")
   }
 
   override def destroy(): Unit = {
@@ -17,6 +17,6 @@ class CampaignSelectionFilter extends Filter with LazyLogging {
   }
 
   override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
-
+    chain.doFilter(request, response)
   }
 }

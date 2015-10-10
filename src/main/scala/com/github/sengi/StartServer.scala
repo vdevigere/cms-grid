@@ -8,12 +8,12 @@ import com.typesafe.scalalogging.LazyLogging
  */
 object StartServer extends App with LazyLogging {
   logger.debug("Starting server..")
-
-  UndertowContainer.start()
+  val container = new UndertowContainer()
+  container.start()
 
   Runtime.getRuntime.addShutdownHook(new Thread() {
     override def run(): Unit = {
-      UndertowContainer.close()
+      container.close()
     }
   })
 }
