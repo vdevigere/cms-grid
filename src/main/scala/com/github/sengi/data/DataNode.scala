@@ -2,8 +2,6 @@ package com.github.sengi.data
 
 import com.typesafe.scalalogging.LazyLogging
 import org.infinispan.Cache
-import org.infinispan.configuration.cache.{CacheMode, ConfigurationBuilder}
-import org.infinispan.configuration.global.GlobalConfigurationBuilder
 import org.infinispan.manager.DefaultCacheManager
 
 /**
@@ -11,26 +9,10 @@ import org.infinispan.manager.DefaultCacheManager
  */
 object DataNode extends AutoCloseable with LazyLogging {
   logger.debug("Starting data node..")
-  val cacheManager = new DefaultCacheManager(GlobalConfigurationBuilder.defaultClusteredBuilder()
-    .transport()
-    .nodeName("sengi")
-    //.addProperty("configurationFile", "jgroups.xml")
-    .build(),
-    new ConfigurationBuilder()
-      .clustering()
-      .cacheMode(CacheMode.REPL_SYNC)
-      .build())
+  val cacheManager = new DefaultCacheManager()
 
-  cacheManager.defineConfiguration("dist", new ConfigurationBuilder()
-    .clustering()
-    .cacheMode(CacheMode.DIST_SYNC)
-    .hash().numOwners(2)
-    .build())
-
-  def start(cacheName: String): Cache[String, String] = {
-    val cache: Cache[String, String] = cacheManager.getCache(cacheName)
-    logger.debug("Cache {} started on {}, cache members are now {}", cacheName, cacheManager.getAddress(),
-      cache.getAdvancedCache().getRpcManager().getMembers());
+  def start(cacheName: String = null): Cache[String, Any] = {
+    val cache: Cache[String, Any] = if (cacheName == null) cacheManager.getCache[String, Any] else cacheManager.getCache(cacheName)
     cache.addListener(LoggingListener)
     cache
   }

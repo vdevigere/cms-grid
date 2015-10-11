@@ -7,7 +7,7 @@ import com.github.sengi.servlets._
 import com.typesafe.scalalogging.LazyLogging
 import io.undertow.server.handlers.PathHandler
 import io.undertow.servlet.Servlets
-import io.undertow.servlet.api.{DeploymentInfo, DeploymentManager, InstanceFactory, InstanceHandle}
+import io.undertow.servlet.api._
 import io.undertow.{Handlers, Undertow}
 import org.apache.lucene.search.Query
 import org.infinispan.Cache
@@ -16,24 +16,16 @@ import org.infinispan.manager.DefaultCacheManager
 /**
  * Created by viddu on 9/26/15.
  */
-class UndertowContainer(val cache: Cache[Query, Campaign] = new DefaultCacheManager().getCache[Query, Campaign](),
-                        val port: Integer = 8080,
+class UndertowContainer(val port: Integer = 8080,
                         val host: String = "localhost",
                         val contextRoot: String = "/sengi") extends LazyLogging with AutoCloseable {
 
 
   val servletBuilder: DeploymentInfo = Servlets.deployment()
     .setClassLoader(this.getClass.getClassLoader())
-    .setContextPath("/sengi")
+    .setContextPath(contextRoot)
     .setDeploymentName("sengi")
-    .addServlet(Servlets.servlet("echoSeed", classOf[EchoSeedServlet]).addMapping("/*"))
-    // Assigns a UUID seed if none present
-    .addFilter(Servlets.filter("seedFilter", classOf[SeedFilter])).addFilterUrlMapping("seedFilter", "/*", DispatcherType.REQUEST)
-    // Builds an index out of the request
-    .addFilter(Servlets.filter("indexFilter", classOf[RequestIndexingFilter])).addFilterUrlMapping("indexFilter", "/*", DispatcherType.REQUEST)
-    // Selects queries that satisfy the index built in previous step.
-    .addFilter(Servlets.filter("targetSelecte", classOf[TargetSelectionFilter], new TargetSelectionFilter(cache)))
-    .addFilter(Servlets.filter("campaignSelector", classOf[CampaignSelectionFilter], new CampaignSelectionFilter())).addFilterUrlMapping("campaignSelector", "/*", DispatcherType.REQUEST)
+    .addListener(new ListenerInfo(classOf[SengiServletListener]))
 
   val manager: DeploymentManager = Servlets.defaultContainer().addDeployment(servletBuilder)
   manager.deploy()

@@ -5,4 +5,5 @@ package com.github.sengi.api
  */
 object SengiConstants {
   val INDEX_ATTR = "index"
+  val CAMPAIGN_CACHE_ATTR = "campaignCache"
 }
